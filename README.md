@@ -96,8 +96,6 @@ safe-stack/
 │   └── secrets-scan.sh             # Scan your codebase for leaked secrets
 ├── examples/
 │   └── vulnerable-vs-secure.md     # Side-by-side secure code patterns
-└── templates/
-    └── .gitignore                  # Security-focused gitignore
 ```
 
 ---

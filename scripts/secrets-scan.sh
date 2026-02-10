@@ -40,17 +40,22 @@ search_pattern() {
     local description="$2"
     local results
     
-    results=$(grep -rn --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" \
-                       --include="*.py" --include="*.rb" --include="*.php" --include="*.go" \
-                       --include="*.java" --include="*.cs" --include="*.env*" --include="*.json" \
-                       --include="*.yml" --include="*.yaml" --include="*.toml" --include="*.xml" \
-                       --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=vendor \
-                       --exclude-dir=__pycache__ --exclude-dir=.next --exclude-dir=dist \
-                       --exclude-dir=build --exclude="*.min.js" --exclude="package-lock.json" \
-                       -E "$pattern" "$SCAN_DIR" 2>/dev/null || true)
+    # Updated: Added Dockerfile, .tf, .properties, .sh
+    # Updated: Added --text to avoid treating some code as binary
+    # Updated: Excluded coverage and lock files
+    results=$(grep -rn --text \
+        --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" \
+        --include="*.py" --include="*.rb" --include="*.php" --include="*.go" \
+        --include="*.java" --include="*.cs" --include="*.env*" --include="*.json" \
+        --include="*.yml" --include="*.yaml" --include="*.toml" --include="*.xml" \
+        --include="Dockerfile" --include="*.tf" --include="*.properties" --include="*.sh" \
+        --exclude-dir={node_modules,.git,vendor,__pycache__,.next,dist,build,coverage} \
+        --exclude="*.min.js" --exclude="package-lock.json" --exclude="yarn.lock" \
+        -E "$pattern" "$SCAN_DIR" 2>/dev/null || true)
     
     if [ -n "$results" ]; then
         echo -e "${RED}⚠️  $description${NC}"
+        # Limit output to avoid flooding terminal
         echo "$results" | head -10
         if [ $(echo "$results" | wc -l) -gt 10 ]; then
             echo -e "${YELLOW}   ... and more (showing first 10)${NC}"
@@ -72,9 +77,9 @@ search_pattern "sk_live_[a-zA-Z0-9]{24,}" "Stripe Live Secret Key"
 search_pattern "sk_test_[a-zA-Z0-9]{24,}" "Stripe Test Secret Key (remove before production)"
 search_pattern "rk_live_[a-zA-Z0-9]{24,}" "Stripe Restricted Key"
 
-# AWS
+# AWS (Updated for Mac compatibility)
 search_pattern "AKIA[0-9A-Z]{16}" "AWS Access Key ID"
-search_pattern "aws_secret_access_key\s*=\s*['\"][^'\"]{40}['\"]" "AWS Secret Access Key"
+search_pattern "aws_secret_access_key[[:space:]]*=[[:space:]]*['\"][^'\"]{40}['\"]" "AWS Secret Access Key"
 
 # OpenAI
 search_pattern "sk-[a-zA-Z0-9]{48}" "OpenAI API Key"
@@ -93,19 +98,19 @@ search_pattern "AIza[0-9A-Za-z-_]{35}" "Google API Key"
 # Supabase
 search_pattern "sbp_[a-zA-Z0-9]{40}" "Supabase Service Key"
 
-# Generic patterns
+# Generic patterns (Updated for Mac compatibility)
 search_pattern "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----" "Private Key"
-search_pattern "(password|passwd|pwd)\s*=\s*['\"][^'\"]{8,}['\"]" "Hardcoded Password"
-search_pattern "(api_key|apikey|api-key)\s*=\s*['\"][^'\"]{16,}['\"]" "Generic API Key"
-search_pattern "(secret|token)\s*=\s*['\"][^'\"]{16,}['\"]" "Generic Secret/Token"
+search_pattern "(password|passwd|pwd)[[:space:]]*=[[:space:]]*['\"][^'\"]{8,}['\"]" "Hardcoded Password"
+search_pattern "(api_key|apikey|api-key)[[:space:]]*=[[:space:]]*['\"][^'\"]{16,}['\"]" "Generic API Key"
+search_pattern "(secret|token)[[:space:]]*=[[:space:]]*['\"][^'\"]{16,}['\"]" "Generic Secret/Token"
 
 # Database URLs with credentials
 search_pattern "postgres://[^:]+:[^@]+@" "PostgreSQL Connection String with Password"
 search_pattern "mysql://[^:]+:[^@]+@" "MySQL Connection String with Password"
 search_pattern "mongodb://[^:]+:[^@]+@" "MongoDB Connection String with Password"
 
-# JWT Secrets (common weak values)
-search_pattern "jwt[_-]?secret\s*=\s*['\"][^'\"]{8,}['\"]" "JWT Secret"
+# JWT Secrets (Updated for Mac compatibility)
+search_pattern "jwt[_-]?secret[[:space:]]*=[[:space:]]*['\"][^'\"]{8,}['\"]" "JWT Secret"
 
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
@@ -128,6 +133,5 @@ else
     echo "Consider using dedicated tools like:"
     echo "  - gitleaks (https://github.com/gitleaks/gitleaks)"
     echo "  - trufflehog (https://github.com/trufflesecurity/trufflehog)"
-    echo "  - git-secrets (https://github.com/awslabs/git-secrets)"
     exit 0
 fi

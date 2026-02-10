@@ -275,4 +275,4 @@ The full **Founder's Pre-Launch Security Audit** includes:
 
 ---
 
-*Part of the [SAFE Stack Framework](https://github.com/safestacklabs/safe-stack)*
+*Part of the [SAFE Stack Framework](https://github.com/ai-code-security/ai-code-security)*

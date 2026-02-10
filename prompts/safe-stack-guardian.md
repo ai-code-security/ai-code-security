@@ -227,4 +227,4 @@ Check [safestacklabs.com](https://safestacklabs.com) for the latest version.
 
 ---
 
-*Part of the [SAFE Stack Framework](https://github.com/safestacklabs/safe-stack)*
+*Part of the [SAFE Stack Framework](https://github.com/ai-code-security/ai-code-security)*
